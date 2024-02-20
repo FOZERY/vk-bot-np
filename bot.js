@@ -3,6 +3,14 @@ const { LONG_POLL_TOKEN, USER_TOKEN } = require('./config.js');
 const { VK, API, Keyboard } = require('vk-io');
 const { HearManager } = require('@vk-io/hear');
 const { SessionManager } = require('@vk-io/session');
+const { SceneManager, StepScene } = require('@vk-io/scenes');
+
+const {
+  addDateKeyboard,
+  timeKeyboard,
+  menuKeyboard,
+} = require('./utils/keyboards.js');
+
 const { menuCommands } = require('./controllers/commands.js');
 
 const vk = new VK({
@@ -16,8 +24,16 @@ const api = new API({
 
 const hearManager = new HearManager();
 const sessionManager = new SessionManager();
+const sceneManager = new SceneManager();
 
-vk.updates.on(['message_new', 'message_event'], [sessionManager.middleware]);
+vk.updates.on(
+  ['message_new', 'message_event'],
+  [
+    sessionManager.middleware,
+    sceneManager.middleware,
+    sceneManager.middlewareIntercept,
+  ]
+);
 
 vk.updates.on('message_new', async (context, next) => {
   if (context.isChat || context.isOutbox) {
@@ -53,6 +69,43 @@ hearCommand('start', [/Старт/i, /Начать/i, /start/i], menuCommands.me
 
 hearCommand('add', menuCommands.add);
 
+sceneManager.addScenes([
+  new StepScene('add', [
+    async (context) => {
+      if (context.scene.step.firstTime || !context.text) {
+        return context.send({
+          message: `Введите дату в формате ДД.ММ.ГГГГ`,
+          keyboard: addDateKeyboard,
+        });
+      }
+
+      if (!context.messagePayload) {
+        const [day, month, year] = context.text.split('.');
+        context.scene.state.date = {
+          year: year,
+          month: month,
+          day: day,
+        };
+      } else {
+        context.scene.state.date = context.messagePayload.date;
+      }
+      console.log(context.scene.state.date);
+      await context.scene.leave();
+      return context.send({
+        message: `Используйте клавиатуру`,
+        keyboard: menuKeyboard,
+      });
+    },
+    (context) => {
+      return context.send({
+        message: `Введите время в формате ЧЧ:ММ`,
+        keyboard: timeKeyboard,
+      });
+      context.scene.state.date.time = context.text;
+    },
+  ]),
+]);
+
 hearManager.onFallback(async (context) => {
   await context.send(`Такой команды нет!
 
@@ -61,84 +114,6 @@ hearManager.onFallback(async (context) => {
 
 console.log('Started');
 vk.updates.start().catch(console.error);
-
-const startKeyboard = Keyboard.builder()
-  .textButton({
-    label: 'Добавить в расписание',
-    payload: {
-      command: 'add',
-    },
-    color: Keyboard.POSITIVE_COLOR,
-  })
-  .row()
-  .textButton({
-    label: 'Изменить расписание',
-    payload: {
-      command: 'change',
-    },
-    color: Keyboard.PRIMARY_COLOR,
-  })
-  .row()
-  .textButton({
-    label: 'Удалить из расписания',
-    payload: {
-      command: 'delete',
-    },
-    color: Keyboard.NEGATIVE_COLOR,
-  });
-
-const addKeyboard = Keyboard.builder()
-  .callbackButton({
-    label: '01.02',
-    payload: {
-      command: 'add',
-    },
-    color: Keyboard.POSITIVE_COLOR,
-  })
-  .callbackButton({
-    label: '02.02',
-    payload: {
-      command: 'add',
-    },
-    color: Keyboard.POSITIVE_COLOR,
-  })
-  .callbackButton({
-    label: '03.02',
-    payload: {
-      command: 'add',
-    },
-    color: Keyboard.POSITIVE_COLOR,
-  })
-  .callbackButton({
-    label: '04.02',
-    payload: {
-      command: 'add',
-    },
-    color: Keyboard.POSITIVE_COLOR,
-  })
-  .callbackButton({
-    label: '05.02',
-    payload: {
-      command: 'add',
-    },
-    color: Keyboard.POSITIVE_COLOR,
-  })
-  .row()
-  .callbackButton({
-    label: '06.02',
-    payload: {
-      command: 'add',
-    },
-    color: Keyboard.POSITIVE_COLOR,
-  })
-  .callbackButton({
-    label: '07.02',
-    payload: {
-      command: 'add',
-    },
-    color: Keyboard.POSITIVE_COLOR,
-  })
-  .row();
 
 /*
   // hear wrapper

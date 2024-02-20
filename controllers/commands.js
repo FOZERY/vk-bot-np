@@ -9,7 +9,7 @@ const menuCommands = {
   },
 
   add: async function (context) {
-    await context.send('add ');
+    await context.scene.enter('add');
   },
 };
 
