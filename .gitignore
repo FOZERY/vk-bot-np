@@ -1,1 +1,3 @@
 config.js
+.prettierrc
+node_modules

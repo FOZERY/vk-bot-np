@@ -10,8 +10,9 @@ const {
   timeKeyboard,
   menuKeyboard,
 } = require('./utils/keyboards.js');
-
 const { menuCommands } = require('./controllers/commands.js');
+const { isValidDate } = require('./utils/isValidDate.js');
+const { isValidTime } = require('./utils/isValidTime.js');
 
 const vk = new VK({
   token: LONG_POLL_TOKEN,
@@ -40,6 +41,7 @@ vk.updates.on('message_new', async (context, next) => {
     return;
   }
   const { messagePayload } = context;
+  console.log(messagePayload);
 
   context.state.command =
     messagePayload && messagePayload.command ? messagePayload.command : null;
@@ -49,12 +51,12 @@ vk.updates.on('message_new', async (context, next) => {
 
 vk.updates.on('message_new', hearManager.middleware);
 
+// hearCommand wrapper (для использования одной команды для кнопки и текста)
 const hearCommand = (name, conditions, handle) => {
   if (typeof handle !== 'function') {
     handle = conditions;
     conditions = [`/${name}`];
   }
-
   if (!Array.isArray(conditions)) {
     conditions = [conditions];
   }
@@ -66,21 +68,43 @@ const hearCommand = (name, conditions, handle) => {
 };
 
 hearCommand('start', [/Старт/i, /Начать/i, /start/i], menuCommands.menu);
-
-hearCommand('add', menuCommands.add);
+hearCommand(
+  'add',
+  [/Добавить/i, /Добавить в расписание/i, /Внести/i, /add/i],
+  menuCommands.add
+);
 
 sceneManager.addScenes([
   new StepScene('add', [
     async (context) => {
       if (context.scene.step.firstTime || !context.text) {
         return context.send({
-          message: `Введите дату в формате ДД.ММ.ГГГГ`,
+          message: `Введи дату в формате ДД.ММ.ГГГГ
+
+Чтобы отменить добавление нового события, напиши Отмена, либо нажми кнопку`,
           keyboard: addDateKeyboard,
         });
       }
 
-      if (!context.messagePayload) {
-        const [day, month, year] = context.text.split('.');
+      // выход
+      if (
+        /Отмена/i.test(context.text) ||
+        /quit/i.test(context.text) ||
+        context.messagePayload?.command == 'quit'
+      ) {
+        context.send(`Используйте меню`, {
+          keyboard: menuKeyboard,
+        });
+        return await context.scene.leave();
+      }
+
+      if (!context.messagePayload?.date && context.text) {
+        if (!isValidDate(context.text)) {
+          return context.reply(
+            `Ой... похоже, ты ввёл что-то неправильно, попробуй ещё раз! `
+          );
+        }
+        const [day, month, year] = context.text.split('.').map(Number);
         context.scene.state.date = {
           year: year,
           month: month,
@@ -89,19 +113,48 @@ sceneManager.addScenes([
       } else {
         context.scene.state.date = context.messagePayload.date;
       }
-      console.log(context.scene.state.date);
-      await context.scene.leave();
-      return context.send({
-        message: `Используйте клавиатуру`,
-        keyboard: menuKeyboard,
-      });
+
+      return context.scene.step.next();
     },
-    (context) => {
-      return context.send({
-        message: `Введите время в формате ЧЧ:ММ`,
-        keyboard: timeKeyboard,
-      });
-      context.scene.state.date.time = context.text;
+    async (context) => {
+      if (context.scene.step.firstTime || !context.text) {
+        return context.send({
+          message: `Введите время в формате ЧЧ:ММ`,
+          keyboard: timeKeyboard,
+        });
+      }
+      //выход
+      if (
+        /Отмена/i.test(context.text) ||
+        /quit/i.test(context.text) ||
+        context.messagePayload?.command == 'quit'
+      ) {
+        context.send(`Используйте меню`, {
+          keyboard: menuKeyboard,
+        });
+        return await context.scene.leave();
+      }
+
+      if (!context.messagePayload?.date && context.text) {
+        if (!isValidTime(context.text)) {
+          return context.reply(
+            `Ой... похоже, ты ввёл что-то неправильно, попробуй ещё раз! `
+          );
+        }
+        const textTime = context.text;
+        const time = textTime.split(' - ')[0];
+        context.scene.state.date = {
+          time: time,
+          textTime: textTime,
+        };
+      } else {
+        context.scene.state.date = {
+          ...context.scene.state.date,
+          ...context.messagePayload.date,
+        };
+      }
+
+      return context.scene.step.next();
     },
   ]),
 ]);
