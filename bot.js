@@ -1,130 +1,194 @@
-const { LONG_POLL_TOKEN, USER_TOKEN } = require("./config.js");
+const { LONG_POLL_TOKEN, USER_TOKEN } = require('./config.js');
 
-const { VK, API } = require("vk-io");
-const { HearManager } = require("@vk-io/hear");
+const { VK, API, Keyboard } = require('vk-io');
+const { HearManager } = require('@vk-io/hear');
+const { SessionManager } = require('@vk-io/session');
+const { menuCommands } = require('./controllers/commands.js');
 
 const vk = new VK({
   token: LONG_POLL_TOKEN,
-  apiVersion: "5.199",
+  apiVersion: '5.199',
 });
 const api = new API({
   token: USER_TOKEN,
-  apiVersion: "5.199",
+  apiVersion: '5.199',
 });
-const bot = new HearManager();
 
-const fetchPage = async () => {
-  try {
-    let { source } = await api.pages.get({
-      owner_id: -224632380,
-      page_id: 53660422,
-      need_source: 1,
-    });
-    return source;
-  } catch (err) {
-    console.log(err);
-  }
-};
+const hearManager = new HearManager();
+const sessionManager = new SessionManager();
 
-const savePage = async (text) => {
-  try {
-    await api.pages.save({
-      text: text,
-      page_id: 53660422,
-      group_id: 224632380,
-      user_id: 137128439,
-      title: "Расписание",
-    });
-  } catch (err) {
-    console.log(err);
-  }
-};
+vk.updates.on(['message_new', 'message_event'], [sessionManager.middleware]);
 
-// parse page into array of event objects
-const parsePage = (page) => {
-  page = page.replace(/{\||\|}/g, "").replace(/\n<br\/>/g, "");
-
-  let events = page
-    .split("|-\n")
-    .filter((str) => str.trim() !== "")
-    .map((str) => {
-      const values = str
-        .split("\n")
-        .filter((item) => item.trim() !== "")
-        .map((item) => item.replace("| ", ""));
-      return {
-        date: {
-          year: "2024",
-          month: values[0].trim().split(".")[1],
-          day: values[0].trim().split(".")[0],
-          time: values[1].trim(),
-        },
-        event: values[2].trim(),
-        address: values[3].trim(),
-        organizer: values[4].trim(),
-      };
-    });
-  return events;
-};
-
-// sort by date function
-function compareByDate(a, b) {
-  aTime = a.date.time.split("-").map((item) => item.trim())[0];
-  aDate = new Date(`${a.date.year}-${a.date.month}-${a.date.day}T${aTime}`);
-  bTime = b.date.time.split("-").map((item) => item.trim())[0];
-  bDate = new Date(`${b.date.year}-${b.date.month}-${b.date.day}T${bTime}`);
-
-  if (aDate < bDate) {
-    return -1;
-  }
-  if (aDate > bDate) {
-    return 1;
-  }
-  return 0;
-}
-
-const insertNewEvent = async (events, newEvent) => {
-  if (events.find((event) => event.event === newEvent.event)) {
-    console.log("Элемент с таким названием уже есть");
+vk.updates.on('message_new', async (context, next) => {
+  if (context.isChat || context.isOutbox) {
     return;
   }
+  const { messagePayload } = context;
 
-  events.push(newEvent); // push new event object in events array
+  context.state.command =
+    messagePayload && messagePayload.command ? messagePayload.command : null;
 
-  console.log(events);
+  return next();
+});
 
-  // sort table with events by date
-  events.sort(compareByDate(a, b));
-  console.log(events);
+vk.updates.on('message_new', hearManager.middleware);
 
-  let newSchedule = events.reduce((acc, event) => {
-    return `${acc}|-\n| ${event.date.day}.${event.date.month}\n| ${event.date.time}\n| ${event.event}\n| ${event.address}\n| ${event.organizer}\n`;
-  }, "");
-  newSchedule = `{|\n${newSchedule}|}`;
-
-  await savePage(newSchedule);
-};
-
-(async () => {
-  try {
-    let page = await fetchPage();
-
-    const events = parsePage(page);
-
-    insertNewEvent(events, newEvent);
-  } catch (err) {
-    console.log(err);
+const hearCommand = (name, conditions, handle) => {
+  if (typeof handle !== 'function') {
+    handle = conditions;
+    conditions = [`/${name}`];
   }
-})();
 
-let newEvent = {
-  date: {
-    year: "2024",
-    month: "02",
-    day: "13",
-    time: "13:00",
-  },
-  event: "Новый ивент 13.02№6",
-  address: "Народный бульвар, 3А",
-  organizer: "Дима Тагиев",
+  if (!Array.isArray(conditions)) {
+    conditions = [conditions];
+  }
+
+  hearManager.hear(
+    [(text, { state }) => state.command === name, ...conditions],
+    handle
+  );
 };
+
+hearCommand('start', [/Старт/i, /Начать/i, /start/i], menuCommands.menu);
+
+hearCommand('add', menuCommands.add);
+
+hearManager.onFallback(async (context) => {
+  await context.send(`Такой команды нет!
+
+  Введите /help для просмотра команд.`);
+});
+
+console.log('Started');
+vk.updates.start().catch(console.error);
+
+const startKeyboard = Keyboard.builder()
+  .textButton({
+    label: 'Добавить в расписание',
+    payload: {
+      command: 'add',
+    },
+    color: Keyboard.POSITIVE_COLOR,
+  })
+  .row()
+  .textButton({
+    label: 'Изменить расписание',
+    payload: {
+      command: 'change',
+    },
+    color: Keyboard.PRIMARY_COLOR,
+  })
+  .row()
+  .textButton({
+    label: 'Удалить из расписания',
+    payload: {
+      command: 'delete',
+    },
+    color: Keyboard.NEGATIVE_COLOR,
+  });
+
+const addKeyboard = Keyboard.builder()
+  .callbackButton({
+    label: '01.02',
+    payload: {
+      command: 'add',
+    },
+    color: Keyboard.POSITIVE_COLOR,
+  })
+  .callbackButton({
+    label: '02.02',
+    payload: {
+      command: 'add',
+    },
+    color: Keyboard.POSITIVE_COLOR,
+  })
+  .callbackButton({
+    label: '03.02',
+    payload: {
+      command: 'add',
+    },
+    color: Keyboard.POSITIVE_COLOR,
+  })
+  .callbackButton({
+    label: '04.02',
+    payload: {
+      command: 'add',
+    },
+    color: Keyboard.POSITIVE_COLOR,
+  })
+  .callbackButton({
+    label: '05.02',
+    payload: {
+      command: 'add',
+    },
+    color: Keyboard.POSITIVE_COLOR,
+  })
+  .row()
+  .callbackButton({
+    label: '06.02',
+    payload: {
+      command: 'add',
+    },
+    color: Keyboard.POSITIVE_COLOR,
+  })
+  .callbackButton({
+    label: '07.02',
+    payload: {
+      command: 'add',
+    },
+    color: Keyboard.POSITIVE_COLOR,
+  })
+  .row();
+
+/*
+  // hear wrapper
+const hearCommand = (name, conditions, handle) => {
+  if (typeof handle !== 'function') {
+    handle = conditions;
+    conditions = [`/${name}`];
+  }
+
+  if (!Array.isArray(conditions)) {
+    conditions = [conditions];
+  }
+
+  hearManager.hear(
+    [(text, { state }) => state.command === name, ...conditions],
+    handle
+  );
+};
+
+hearCommand('help', [/help/i, /помощь/i], async (context) => {
+  await context.send(`
+  Мои команды:
+
+  /start - начать
+  /help - помощь
+  /add - добавить в расписание
+  /change - изменить событие
+  /delete - удалить из расписания
+`);
+});
+
+hearCommand('start', [/start/i, /начать/i, /старт/i], async (context) => {
+  await context.send({
+    message: `
+    Привет! 
+    
+    Я бот для редактирования расписания группы Нового Поколения.
+
+    Используй кнопки для дальнейших действий, либо воспользуйся одной из команд.
+    
+    Чтобы увидеть список команд используй /help.
+    `,
+    keyboard: startKeyboard,
+  });
+});
+
+hearCommand('add', ['/add'], async (context) => {
+  await context.send({
+    message: 'Выберите или введите дату',
+    keyboard: addKeyboard,
+  });
+});
+*/
