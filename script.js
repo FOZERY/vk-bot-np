@@ -2,6 +2,15 @@ const { VK, API } = require('vk-io');
 
 const { USER_TOKEN } = require('./config.js');
 
+const { isTimeOverlap } = require('./utils/isTimeOverlap.js');
+
+class OverlapError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'OverlapError';
+  }
+}
+
 const api = new API({
   token: USER_TOKEN,
   apiVersion: '5.199',
@@ -37,7 +46,6 @@ const savePage = async (text) => {
 // parse page into array of event objects
 const parsePage = (page) => {
   page = page.replace(/{\||\|}/g, '').replace(/\n<br\/>/g, '');
-
   let events = page
     .split('|-\n')
     .filter((str) => str.trim() !== '')
@@ -46,18 +54,33 @@ const parsePage = (page) => {
         .split('\n')
         .filter((item) => item.trim() !== '')
         .map((item) => item.replace('| ', ''));
+      const year = values[0].trim().split('.')[2]
+        ? values[0].trim().split('.')[2]
+        : '2024';
+      const month = values[0].trim().split('.')[1];
+      const day = values[0].trim().split('.')[0];
+      const time = values[1]
+        .trim()
+        .split('-')
+        .map((item) => item.trim())
+        .join(' - '); // делаем одинаковые отступы 15:00 - 16:00
+      const [startTime, endTime] = time.split('-').map((item) => item.trim()); // разбиваем на стартовое и конечное время
+
       return {
         date: {
-          year: '2024',
-          month: values[0].trim().split('.')[1],
-          day: values[0].trim().split('.')[0],
-          time: values[1].trim(),
+          year: year,
+          month: month,
+          day: day,
+          time: time,
+          startTime: startTime,
+          endTime: endTime,
         },
         event: values[2].trim(),
         address: values[3].trim(),
         organizer: values[4].trim(),
       };
     });
+
   return events;
 };
 
@@ -78,19 +101,16 @@ function compareByDate(a, b) {
 }
 
 const insertNewEvent = async (events, newEvent) => {
-  /*if (events.find((event) => event.event === newEvent.event)) {
-    console.log('Элемент с таким названием уже есть');
-    return;
+  if (events.find((event) => isTimeOverlap(newEvent, event))) {
+    throw new OverlapError('Такой объект уже есть!');
   }
-  */
-
   events.push(newEvent); // push new event object in events array
 
   // sort table with events by date
   events.sort(compareByDate);
 
   let newSchedule = events.reduce((acc, event) => {
-    return `${acc}|-\n| ${event.date.day}.${event.date.month}\n| ${event.date.time}\n| ${event.event}\n| ${event.address}\n| ${event.organizer}\n`;
+    return `${acc}|-\n| ${event.date.day}.${event.date.month}.${event.date.year}\n| ${event.date.time}\n| ${event.event}\n| ${event.address}\n| ${event.organizer}\n`;
   }, '');
   newSchedule = `{|\n${newSchedule}|}`;
 
@@ -102,10 +122,11 @@ const postNewEvent = async (newEvent) => {
     let page = await fetchPage();
 
     const events = parsePage(page);
-
-    insertNewEvent(events, newEvent);
+    await insertNewEvent(events, newEvent);
   } catch (err) {
-    console.log(err);
+    if (err instanceof OverlapError) {
+      throw err;
+    }
   }
 };
 

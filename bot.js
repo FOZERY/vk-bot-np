@@ -136,12 +136,15 @@ sceneManager.addScenes([
         if (!isValidTime(context.text)) {
           return await context.reply(errorInputText);
         }
-        const textTime = context.text;
-        const time = textTime.split(' - ')[0];
-        context.scene.state.date = {
-          time: textTime,
-          // textTime: textTime,
-        };
+
+        let time = context.text
+          .split('-')
+          .map((item) => item.trim())
+          .join(' - '); // делаем одинаковые отступы 15:00 - 16:00
+        const [startTime, endTime] = time.split('-').map((item) => item.trim()); // разбиваем на стартовое и конечное время
+        context.scene.state.date.time = time;
+        context.scene.state.date.startTime = startTime;
+        context.scene.state.date.endTime = endTime ? endTime : null;
       } else {
         context.scene.state.date = {
           ...context.scene.state.date,
@@ -153,6 +156,7 @@ sceneManager.addScenes([
     },
     async (context) => {
       if (context.scene.step.firstTime || !context.text) {
+        console.log(context.scene.state.date);
         return await context.send({
           message: `Введи название события (не больше 75 символов)`,
           keyboard: previousKeyboard,
@@ -206,7 +210,6 @@ sceneManager.addScenes([
         context.scene.state.address = context.text;
       } else {
         context.scene.state.address = context.messagePayload.address;
-        console.log(context.scene.state.address);
       }
 
       return context.scene.step.next();
@@ -237,9 +240,16 @@ sceneManager.addScenes([
       context.scene.state.organizer = context.text;
 
       const newEvent = context.scene.state;
-      console.log(newEvent);
-      // вынеси в отдельную функцию??
-      postNewEvent(newEvent);
+      // пробрасывать ошибку?
+      try {
+        await postNewEvent(newEvent);
+      } catch (err) {
+        if (err.name == 'OverlapError') {
+          return await context.send(
+            'Эта дата и место уже заняты! Попробуй выбрать другие.'
+          );
+        }
+      }
 
       context.send({
         message: menuText,
@@ -258,56 +268,3 @@ hearManager.onFallback(async (context) => {
 
 console.log('Started');
 vk.updates.start().catch(console.error);
-
-/*
-  // hear wrapper
-const hearCommand = (name, conditions, handle) => {
-  if (typeof handle !== 'function') {
-    handle = conditions;
-    conditions = [`/${name}`];
-  }
-
-  if (!Array.isArray(conditions)) {
-    conditions = [conditions];
-  }
-
-  hearManager.hear(
-    [(text, { state }) => state.command === name, ...conditions],
-    handle
-  );
-};
-
-hearCommand('help', [/help/i, /помощь/i], async (context) => {
-  await context.send(`
-  Мои команды:
-
-  /start - начать
-  /help - помощь
-  /add - добавить в расписание
-  /change - изменить событие
-  /delete - удалить из расписания
-`);
-});
-
-hearCommand('start', [/start/i, /начать/i, /старт/i], async (context) => {
-  await context.send({
-    message: `
-    Привет! 
-    
-    Я бот для редактирования расписания группы Нового Поколения.
-
-    Используй кнопки для дальнейших действий, либо воспользуйся одной из команд.
-    
-    Чтобы увидеть список команд используй /help.
-    `,
-    keyboard: startKeyboard,
-  });
-});
-
-hearCommand('add', ['/add'], async (context) => {
-  await context.send({
-    message: 'Выберите или введите дату',
-    keyboard: addKeyboard,
-  });
-});
-*/

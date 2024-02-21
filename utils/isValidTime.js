@@ -2,7 +2,6 @@ const isValidTime = (userInput) => {
   datePattern = /^(\d{2}:\d{2})(?:\s*-\s*(\d{2}:\d{2}))?$/;
   let isValid = false;
   if (datePattern.test(userInput)) {
-    console.log(userInput.match(datePattern));
     let [, startTime, endTime] = userInput.match(datePattern);
     [startHour, startMinutes] = startTime.split(':').map(Number);
 
