@@ -16,14 +16,12 @@ const { menuCommands } = require('./controllers/commands.js');
 const { isValidDate } = require('./utils/isValidDate.js');
 const { isValidTime } = require('./utils/isValidTime.js');
 
+const { postNewEvent } = require('./script.js');
+
 const { menuText, errorInputText } = require('./utils/texts.js');
 
 const vk = new VK({
   token: LONG_POLL_TOKEN,
-  apiVersion: '5.199',
-});
-const api = new API({
-  token: USER_TOKEN,
   apiVersion: '5.199',
 });
 
@@ -105,7 +103,7 @@ sceneManager.addScenes([
         if (!isValidDate(context.text)) {
           return await context.reply(errorInputText);
         }
-        const [day, month, year] = context.text.split('.').map(Number);
+        const [day, month, year] = context.text.split('.');
         context.scene.state.date = {
           year: year,
           month: month,
@@ -141,8 +139,8 @@ sceneManager.addScenes([
         const textTime = context.text;
         const time = textTime.split(' - ')[0];
         context.scene.state.date = {
-          time: time,
-          textTime: textTime,
+          time: textTime,
+          // textTime: textTime,
         };
       } else {
         context.scene.state.date = {
@@ -212,6 +210,42 @@ sceneManager.addScenes([
       }
 
       return context.scene.step.next();
+    },
+    async (context) => {
+      if (context.scene.step.firstTime || !context.text) {
+        return await context.send({
+          message: `Введи имя и фамилию организатора`,
+          keyboard: previousKeyboard,
+        });
+      }
+
+      //выход
+      if (
+        /Отмена/i.test(context.text) ||
+        /Назад/i.test(context.text) ||
+        /back/i.test(context.text) ||
+        context.messagePayload?.command == 'back'
+      ) {
+        return await context.scene.step.previous();
+      }
+
+      if (context.text.length > 75) {
+        return await context.reply(`${errorInputText}
+          
+          Проверь количество символов!`);
+      }
+      context.scene.state.organizer = context.text;
+
+      const newEvent = context.scene.state;
+      console.log(newEvent);
+      // вынеси в отдельную функцию??
+      postNewEvent(newEvent);
+
+      context.send({
+        message: menuText,
+        keyboard: menuKeyboard,
+      });
+      return await context.scene.leave();
     },
   ]),
 ]);

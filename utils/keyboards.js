@@ -158,9 +158,9 @@ const dateKeyboardGenerator = () => {
         color: Keyboard.POSITIVE_COLOR,
         payload: {
           date: {
-            year: date.getFullYear(),
-            month: date.getMonth(),
-            day: date.getDate(),
+            year: date.getFullYear().toString(),
+            month: month,
+            day: day,
           },
         },
       });

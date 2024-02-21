@@ -1,28 +1,11 @@
-/*
-try {
-    let page = await fetchPage();
+const { VK, API } = require('vk-io');
 
-    const events = parsePage(page);
+const { USER_TOKEN } = require('./config.js');
 
-    insertNewEvent(events, newEvent);
-
-    context.send('Событие успешно было добавлено в расписание!');
-  } catch (err) {
-    console.log(err);
-  };
-*/
-
-let newEvent = {
-  date: {
-    year: '2024',
-    month: '02',
-    day: '13',
-    time: '13:00',
-  },
-  event: 'Новый ивент 13.02№6',
-  address: 'Народный бульвар, 3А',
-  organizer: 'Дима Тагиев',
-};
+const api = new API({
+  token: USER_TOKEN,
+  apiVersion: '5.199',
+});
 
 const fetchPage = async () => {
   try {
@@ -95,18 +78,16 @@ function compareByDate(a, b) {
 }
 
 const insertNewEvent = async (events, newEvent) => {
-  if (events.find((event) => event.event === newEvent.event)) {
+  /*if (events.find((event) => event.event === newEvent.event)) {
     console.log('Элемент с таким названием уже есть');
     return;
   }
+  */
 
   events.push(newEvent); // push new event object in events array
 
-  console.log(events);
-
   // sort table with events by date
-  events.sort(compareByDate(a, b));
-  console.log(events);
+  events.sort(compareByDate);
 
   let newSchedule = events.reduce((acc, event) => {
     return `${acc}|-\n| ${event.date.day}.${event.date.month}\n| ${event.date.time}\n| ${event.event}\n| ${event.address}\n| ${event.organizer}\n`;
@@ -114,4 +95,20 @@ const insertNewEvent = async (events, newEvent) => {
   newSchedule = `{|\n${newSchedule}|}`;
 
   await savePage(newSchedule);
+};
+
+const postNewEvent = async (newEvent) => {
+  try {
+    let page = await fetchPage();
+
+    const events = parsePage(page);
+
+    insertNewEvent(events, newEvent);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+module.exports = {
+  postNewEvent,
 };
