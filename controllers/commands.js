@@ -1,9 +1,10 @@
 const { menuKeyboard } = require('../utils/keyboards.js');
+const { startText } = require('../utils/texts.js');
 
 const menuCommands = {
   menu: async function (context) {
     await context.send({
-      message: 'Используйте клавиатуру',
+      message: startText,
       keyboard: menuKeyboard,
     });
   },

@@ -1,42 +1,5 @@
 const { Keyboard } = require('vk-io');
 
-const dateKeyboardGenerator = () => {
-  const date = new Date();
-  let day;
-  let month;
-  const keyboard = Keyboard.builder();
-
-  for (let i = 0; i < 5; i++) {
-    for (let j = 0; j < 5; j++) {
-      day = ('0' + date.getDate()).slice(-2);
-      month = ('0' + (date.getMonth() + 1)).slice(-2);
-
-      keyboard.textButton({
-        label: `${day}.${month}`,
-        color: Keyboard.POSITIVE_COLOR,
-        payload: {
-          date: {
-            year: date.getFullYear(),
-            month: date.getMonth(),
-            day: date.getDate(),
-          },
-        },
-      });
-      date.setDate(date.getDate() + 1);
-    }
-    keyboard.row();
-  }
-  keyboard.textButton({
-    label: `Отмена`,
-    color: Keyboard.NEGATIVE_COLOR,
-    payload: {
-      command: `quit`,
-    },
-  });
-
-  return keyboard;
-};
-
 const timeKeyboard = Keyboard.builder()
   .textButton({
     label: '00:00',
@@ -147,10 +110,10 @@ const timeKeyboard = Keyboard.builder()
   })
   .row()
   .textButton({
-    label: `Отмена`,
+    label: `Назад`,
     color: Keyboard.NEGATIVE_COLOR,
     payload: {
-      command: 'quit',
+      command: 'back',
     },
   });
 
@@ -179,10 +142,74 @@ const menuKeyboard = Keyboard.builder()
     },
   });
 
+const dateKeyboardGenerator = () => {
+  const date = new Date();
+  let day;
+  let month;
+  const keyboard = Keyboard.builder();
+
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 5; j++) {
+      day = ('0' + date.getDate()).slice(-2);
+      month = ('0' + (date.getMonth() + 1)).slice(-2);
+
+      keyboard.textButton({
+        label: `${day}.${month}`,
+        color: Keyboard.POSITIVE_COLOR,
+        payload: {
+          date: {
+            year: date.getFullYear(),
+            month: date.getMonth(),
+            day: date.getDate(),
+          },
+        },
+      });
+      date.setDate(date.getDate() + 1);
+    }
+    keyboard.row();
+  }
+  keyboard.textButton({
+    label: `Отмена`,
+    color: Keyboard.NEGATIVE_COLOR,
+    payload: {
+      command: `quit`,
+    },
+  });
+
+  return keyboard;
+};
+
 const addDateKeyboard = dateKeyboardGenerator();
+
+const addAddressKeyboard = Keyboard.builder()
+  .textButton({
+    label: `Штаб`,
+    payload: {
+      address: `Народный бульвар, 3А`,
+    },
+    color: Keyboard.PRIMARY_COLOR,
+  })
+  .row()
+  .textButton({
+    label: `Назад`,
+    payload: {
+      command: `back`,
+    },
+    color: Keyboard.NEGATIVE_COLOR,
+  });
+
+const previousKeyboard = Keyboard.builder().textButton({
+  label: `Назад`,
+  payload: {
+    command: `back`,
+  },
+  color: Keyboard.NEGATIVE_COLOR,
+});
 
 module.exports = {
   menuKeyboard,
   addDateKeyboard,
   timeKeyboard,
+  previousKeyboard,
+  addAddressKeyboard,
 };
