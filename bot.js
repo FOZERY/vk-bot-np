@@ -156,7 +156,6 @@ sceneManager.addScenes([
     },
     async (context) => {
       if (context.scene.step.firstTime || !context.text) {
-        console.log(context.scene.state.date);
         return await context.send({
           message: `Введи название события (не больше 75 символов)`,
           keyboard: previousKeyboard,

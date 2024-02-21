@@ -86,10 +86,12 @@ const parsePage = (page) => {
 
 // sort by date function
 function compareByDate(a, b) {
-  aTime = a.date.time.split('-').map((item) => item.trim())[0];
-  aDate = new Date(`${a.date.year}-${a.date.month}-${a.date.day}T${aTime}`);
-  bTime = b.date.time.split('-').map((item) => item.trim())[0];
-  bDate = new Date(`${b.date.year}-${b.date.month}-${b.date.day}T${bTime}`);
+  aDate = new Date(
+    `${a.date.year}-${a.date.month}-${a.date.day}T${a.date.startTime}`
+  );
+  bDate = new Date(
+    `${b.date.year}-${b.date.month}-${b.date.day}T${b.date.startTime}`
+  );
 
   if (aDate < bDate) {
     return -1;
