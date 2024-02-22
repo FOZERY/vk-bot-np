@@ -1,8 +1,8 @@
-const { VK, API } = require('vk-io');
+const { API } = require('vk-io');
 
-const { USER_TOKEN } = require('./config.js');
+const { USER_TOKEN } = require('../config.js');
 
-const { isTimeOverlap } = require('./utils/isTimeOverlap.js');
+const { isTimeOverlap } = require('../utils/isTimeOverlap.js');
 
 class OverlapError extends Error {
   constructor(message) {

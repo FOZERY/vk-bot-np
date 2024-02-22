@@ -6,16 +6,20 @@ const {
   menuKeyboard,
   previousKeyboard,
   addAddressKeyboard,
-} = require('./utils/keyboards.js');
+} = require('../../utils/keyboards.js');
 
-const { postNewEvent } = require('../../script.js');
+const { menuText, errorInputText } = require('../../utils/texts.js');
+
+const { postNewEvent } = require('../../scripts/postNewEvent.js');
+
+const { isValidDate, isValidTime } = require('../../utils/isValid.js');
 
 const stepOne = async (context) => {
   if (context.scene.step.firstTime || !context.text) {
     return await context.send({
-      message: `Введи дату в формате ДД.ММ.ГГГГ
+      message: `Введи дату в формате ДД.ММ.ГГГГ или выбери один из вариантов на клавиатуре.
 
-Чтобы отменить добавление нового события, напиши Отмена, либо нажми кнопку`,
+Чтобы отменить добавление нового события, напиши "Отмена", либо нажми соответствующую кнопку на клавиатуре.`,
       keyboard: addDateKeyboard,
     });
   }
@@ -110,7 +114,7 @@ const stepThree = async (context) => {
   if (context.text.length > 75) {
     return await context.reply(`${errorInputText}
         
-        Проверь количество символов!`);
+Проверь количество символов!`);
   }
 
   context.scene.state.event = context.text;

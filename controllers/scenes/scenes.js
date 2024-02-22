@@ -4,3 +4,5 @@ const { addToScheduleScene } = require('./addToSchedule.js');
 const sceneManager = new SceneManager();
 
 sceneManager.addScenes([new StepScene('add', addToScheduleScene)]);
+
+module.exports = sceneManager;
