@@ -179,7 +179,7 @@ const dateKeyboardGenerator = () => {
   return keyboard;
 };
 
-const addDateKeyboard = dateKeyboardGenerator();
+const dateKeyboard = dateKeyboardGenerator();
 
 const addAddressKeyboard = Keyboard.builder()
   .textButton({
@@ -208,7 +208,7 @@ const previousKeyboard = Keyboard.builder().textButton({
 
 module.exports = {
   menuKeyboard,
-  addDateKeyboard,
+  dateKeyboard,
   timeKeyboard,
   previousKeyboard,
   addAddressKeyboard,

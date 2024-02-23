@@ -1,7 +1,5 @@
-const { VK } = require('vk-io');
-
 const {
-  addDateKeyboard,
+  dateKeyboard,
   timeKeyboard,
   menuKeyboard,
   previousKeyboard,
@@ -20,7 +18,7 @@ const stepOne = async (context) => {
       message: `Введи дату в формате ДД.ММ.ГГГГ или выбери один из вариантов на клавиатуре.
 
 Чтобы отменить добавление нового события, напиши "Отмена", либо нажми соответствующую кнопку на клавиатуре.`,
-      keyboard: addDateKeyboard,
+      keyboard: dateKeyboard,
     });
   }
 
@@ -56,7 +54,7 @@ const stepOne = async (context) => {
 const stepTwo = async (context) => {
   if (context.scene.step.firstTime || !context.text) {
     return await context.send({
-      message: `Введите время в формате ЧЧ:ММ`,
+      message: `Введите время события в формате ЧЧ:ММ( - ЧЧ:ММ)`,
       keyboard: timeKeyboard,
     });
   }
