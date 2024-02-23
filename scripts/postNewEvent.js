@@ -4,12 +4,9 @@ const { USER_TOKEN } = require('../config.js');
 
 const { isTimeOverlap } = require('../utils/isTimeOverlap.js');
 
-class OverlapError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = 'OverlapError';
-  }
-}
+const { compareByDate } = require('../utils/compareByDate.js');
+
+const { OverlapError } = require('../utils/Errors.js');
 
 const api = new API({
   token: USER_TOKEN,
@@ -84,26 +81,8 @@ const parsePage = (page) => {
   return events;
 };
 
-// sort by date function
-function compareByDate(a, b) {
-  aDate = new Date(
-    `${a.date.year}-${a.date.month}-${a.date.day}T${a.date.startTime}`
-  );
-  bDate = new Date(
-    `${b.date.year}-${b.date.month}-${b.date.day}T${b.date.startTime}`
-  );
-
-  if (aDate < bDate) {
-    return -1;
-  }
-  if (aDate > bDate) {
-    return 1;
-  }
-  return 0;
-}
-
 const insertNewEvent = async (events, newEvent) => {
-  if (events.find((event) => isTimeOverlap(newEvent, event))) {
+  if (events.some((event) => isTimeOverlap(newEvent, event))) {
     throw new OverlapError('Такой объект уже есть!');
   }
   events.push(newEvent); // push new event object in events array
