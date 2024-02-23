@@ -9,15 +9,19 @@ const menuCommands = {
     });
   },
 
-  add: async function (context) {
-    await context.scene.enter('add');
-  },
-
   help: async function (context) {
     await context.send({
       message: helpText,
       keyboard: menuKeyboard,
     });
+  },
+
+  add: async function (context) {
+    await context.scene.enter('add');
+  },
+
+  delete: async function (context) {
+    await context.scene.enter('delete');
   },
 };
 
