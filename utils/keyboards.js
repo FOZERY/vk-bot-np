@@ -140,6 +140,12 @@ const menuKeyboard = Keyboard.builder()
     payload: {
       command: 'delete',
     },
+  })
+  .row()
+  .urlButton({
+    label: 'Перейти к расписанию',
+    color: Keyboard.SECONDARY_COLOR,
+    url: 'https://vk.com/page-8733923_35460052',
   });
 
 const dateKeyboardGenerator = () => {
