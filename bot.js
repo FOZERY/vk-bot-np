@@ -73,7 +73,7 @@ hearCommand(
 hearManager.onFallback(async (context) => {
   await context.send(`Такой команды нет!
 
-  Введи /help для просмотра команд.`);
+Введи /help для просмотра команд.`);
 });
 
 console.log('Started');
