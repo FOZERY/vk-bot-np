@@ -24,10 +24,10 @@ const isValidDate = (userInput) => {
 };
 
 const isValidTime = (userInput) => {
-  datePattern = /^(\d{2}:\d{2})(?:\s*-\s*(\d{2}:\d{2}))?$/;
+  timePattern = /^(\d{2}:\d{2})(?:\s*-\s*(\d{2}:\d{2}))?$/;
   let isValid = false;
-  if (datePattern.test(userInput)) {
-    let [, startTime, endTime] = userInput.match(datePattern);
+  if (timePattern.test(userInput)) {
+    let [, startTime, endTime] = userInput.match(timePattern);
     [startHour, startMinutes] = startTime.split(':').map(Number);
 
     isValid = true;
@@ -55,7 +55,28 @@ const isValidTime = (userInput) => {
   return isValid;
 };
 
+const isValidStartTime = (userInput) => {
+  timePattern = /^(\d{2}:\d{2})$/;
+  let isValid = false;
+  if (timePattern.test(userInput)) {
+    let [, startTime] = userInput.match(timePattern);
+    [startHour, startMinutes] = startTime.split(':').map(Number);
+
+    isValid = true;
+
+    if (startHour < 0 || startHour > 23) {
+      return (isValid = false);
+    } else {
+      if (startMinutes < 0 || startMinutes > 59) {
+        return (isValid = false);
+      }
+    }
+  }
+  return isValid;
+};
+
 module.exports = {
   isValidDate,
   isValidTime,
+  isValidStartTime,
 };

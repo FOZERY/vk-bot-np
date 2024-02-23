@@ -1,3 +1,4 @@
+// Возвращает true, если время выбрано неверно.
 const isTimeOverlap = (newEvent, event) => {
   const newEventStartDate = new Date(
     `${newEvent.date.year}-${newEvent.date.month}-${newEvent.date.day}T${newEvent.date.startTime}`
@@ -24,7 +25,7 @@ const isTimeOverlap = (newEvent, event) => {
     newEvent.address == event.address
   ) {
     if (
-      // проверка промежутков времени, все 4 случая, учитывая, есть ли время окончания события или нет
+      // проверка промежутков времени, все 4 случая, учитывая, есть ли время окончания события или нет.
       (newEventEndDate &&
         !eventEndDate &&
         newEventStartDate <= eventStartDate &&
