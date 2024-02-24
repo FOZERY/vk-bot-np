@@ -23,6 +23,10 @@ const menuCommands = {
   delete: async function (context) {
     await context.scene.enter('delete');
   },
+
+  change: async function (context) {
+    await context.scene.enter('change');
+  },
 };
 
 module.exports = {

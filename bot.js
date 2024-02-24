@@ -70,6 +70,12 @@ hearCommand(
   menuCommands.delete
 );
 
+hearCommand(
+  'change',
+  [/Изменить расписание/i, /Изменить/i, /change/i],
+  menuCommands.change
+);
+
 hearManager.onFallback(async (context) => {
   await context.send(`Такой команды нет!
 
