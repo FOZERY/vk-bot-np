@@ -95,12 +95,12 @@ const deleteFromEvents = async (events, eventToDelete) => {
   }
 };
 
-const deleteEvent = async (newEvent) => {
+const deleteEvent = async (eventToDelete) => {
   try {
     let page = await fetchPage();
 
     const events = parsePage(page);
-    await deleteFromEvents(events, newEvent);
+    await deleteFromEvents(events, eventToDelete);
   } catch (err) {
     if (err instanceof FindEventError) {
       throw err;
