@@ -2,11 +2,11 @@ const { API } = require('vk-io');
 
 const { USER_TOKEN } = require('../config.js');
 
-const { isTimeOverlap } = require('../utils/isTimeOverlap.js');
+const { FindEventError, OverlapError } = require('../utils/Errors.js');
 
 const { compareByDate } = require('../utils/compareByDate.js');
 
-const { OverlapError } = require('../utils/Errors.js');
+const { isTimeOverlap } = require('../utils/isTimeOverlap.js');
 
 const api = new API({
   token: USER_TOKEN,
@@ -81,29 +81,42 @@ const parsePage = (page) => {
   return events;
 };
 
-const insertNewEvent = async (events, newEvent) => {
-  if (events.some((event) => isTimeOverlap(newEvent, event))) {
-    throw new OverlapError('Такой объект уже есть!');
-  }
-  events.push(newEvent); // push new event object in events array
-
-  // sort table with events by date
-  events.sort(compareByDate);
-
-  let newSchedule = events.reduce((acc, event) => {
-    return `${acc}|-\n| ${event.date.day}.${event.date.month}.${event.date.year}\n| ${event.date.time}\n| ${event.event}\n| ${event.address}\n| ${event.organizer}\n`;
-  }, '');
-  newSchedule = `{|\n${newSchedule}|}`;
-
-  await savePage(newSchedule);
-};
-
-const postNewEvent = async (newEvent) => {
+const changeEvent = async (newEvent, eventToChange) => {
   try {
+    console.log(newEvent);
     let page = await fetchPage();
+
     const events = parsePage(page);
-    await insertNewEvent(events, newEvent);
+
+    if (events.some((event) => isTimeOverlap(newEvent, event))) {
+      throw new OverlapError('Такой объект уже есть!');
+    }
+
+    indexToChange = events.findIndex(
+      (event) =>
+        event.date.year == eventToChange.date.year &&
+        event.date.month == eventToChange.date.month &&
+        event.date.day == eventToChange.date.day &&
+        event.event == eventToChange.event
+    );
+    if (indexToChange == -1) {
+      throw new FindEventError('Объект не найден!');
+    } else {
+      events.splice(indexToChange, 1, newEvent);
+
+      events.sort(compareByDate);
+
+      let newSchedule = events.reduce((acc, event) => {
+        return `${acc}|-\n| ${event.date.day}.${event.date.month}.${event.date.year}\n| ${event.date.time}\n| ${event.event}\n| ${event.address}\n| ${event.organizer}\n`;
+      }, '');
+      newSchedule = `{|\n${newSchedule}|}`;
+
+      await savePage(newSchedule);
+    }
   } catch (err) {
+    if (err instanceof FindEventError) {
+      throw err;
+    }
     if (err instanceof OverlapError) {
       throw err;
     }
@@ -111,5 +124,5 @@ const postNewEvent = async (newEvent) => {
 };
 
 module.exports = {
-  postNewEvent,
+  changeEvent,
 };

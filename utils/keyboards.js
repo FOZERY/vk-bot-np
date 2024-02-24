@@ -212,10 +212,70 @@ const previousKeyboard = Keyboard.builder().textButton({
   color: Keyboard.NEGATIVE_COLOR,
 });
 
+const yesOrNotKeyboard = Keyboard.builder()
+  .textButton({
+    label: `Да`,
+    payload: {
+      command: 'yes',
+    },
+    color: Keyboard.POSITIVE_COLOR,
+  })
+  .row()
+  .textButton({
+    label: `Нет`,
+    payload: {
+      command: 'no',
+    },
+    color: Keyboard.NEGATIVE_COLOR,
+  });
+
+const changeSelectKeyboard = Keyboard.builder()
+  .textButton({
+    label: `Дату`,
+    payload: {
+      command: 'date',
+    },
+  })
+  .textButton({
+    label: 'Время',
+    payload: {
+      command: 'time',
+    },
+  })
+  .row()
+  .textButton({
+    label: `Название`,
+    payload: {
+      command: 'event',
+    },
+  })
+  .textButton({
+    label: 'Место',
+    payload: {
+      command: 'address',
+    },
+  })
+  .row()
+  .textButton({
+    label: `Организатора`,
+    payload: {
+      command: 'organizer',
+    },
+  })
+  .textButton({
+    label: 'Подтвердить',
+    payload: {
+      command: 'accept',
+    },
+  })
+  .row();
+
 module.exports = {
   menuKeyboard,
   dateKeyboard,
   timeKeyboard,
   previousKeyboard,
   addAddressKeyboard,
+  yesOrNotKeyboard,
+  changeSelectKeyboard,
 };
