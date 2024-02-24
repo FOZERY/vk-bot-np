@@ -88,10 +88,6 @@ const changeEvent = async (newEvent, eventToChange) => {
 
     const events = parsePage(page);
 
-    if (events.some((event) => isTimeOverlap(newEvent, event))) {
-      throw new OverlapError('Такой объект уже есть!');
-    }
-
     indexToChange = events.findIndex(
       (event) =>
         event.date.year == eventToChange.date.year &&
@@ -99,20 +95,22 @@ const changeEvent = async (newEvent, eventToChange) => {
         event.date.day == eventToChange.date.day &&
         event.event == eventToChange.event
     );
-    if (indexToChange == -1) {
-      throw new FindEventError('Объект не найден!');
-    } else {
-      events.splice(indexToChange, 1, newEvent);
+    events.splice(indexToChange, 1);
 
-      events.sort(compareByDate);
-
-      let newSchedule = events.reduce((acc, event) => {
-        return `${acc}|-\n| ${event.date.day}.${event.date.month}.${event.date.year}\n| ${event.date.time}\n| ${event.event}\n| ${event.address}\n| ${event.organizer}\n`;
-      }, '');
-      newSchedule = `{|\n${newSchedule}|}`;
-
-      await savePage(newSchedule);
+    if (events.some((event) => isTimeOverlap(newEvent, event))) {
+      throw new OverlapError('Такой объект уже есть!');
     }
+
+    events.splice(indexToChange, 0, newEvent);
+
+    events.sort(compareByDate);
+
+    let newSchedule = events.reduce((acc, event) => {
+      return `${acc}|-\n| ${event.date.day}.${event.date.month}.${event.date.year}\n| ${event.date.time}\n| ${event.event}\n| ${event.address}\n| ${event.organizer}\n`;
+    }, '');
+    newSchedule = `{|\n${newSchedule}|}`;
+
+    await savePage(newSchedule);
   } catch (err) {
     if (err instanceof FindEventError) {
       throw err;
