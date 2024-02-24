@@ -173,7 +173,7 @@ const stepFive = async (context) => {
   if (context.text.length > 75) {
     return await context.reply(`${errorInputText}
         
-        Проверь количество символов!`);
+Проверь количество символов!`);
   }
   context.scene.state.organizer = context.text;
 
@@ -190,7 +190,7 @@ const stepFive = async (context) => {
   }
 
   context.send({
-    message: menuText,
+    message: 'Событие успешно добавлено!',
     keyboard: menuKeyboard,
   });
   return await context.scene.leave();
