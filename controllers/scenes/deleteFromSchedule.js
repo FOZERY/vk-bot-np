@@ -3,11 +3,10 @@ const { menuText, errorInputText } = require('../../utils/texts');
 const {
   dateKeyboard,
   menuKeyboard,
-  timeKeyboard,
   previousKeyboard,
 } = require('../../utils/keyboards');
 
-const { isValidDate, isValidStartTime } = require('../../utils/isValid.js');
+const { isValidDate } = require('../../utils/isValid.js');
 
 const { deleteEvent } = require('../../scripts/deleteEvent.js');
 
@@ -50,43 +49,7 @@ const stepOne = async (context) => {
   return context.scene.step.next();
 };
 
-/*const stepTwo = async (context) => {
-  if (context.scene.step.firstTime || !context.text) {
-    return await context.send({
-      message: `Введите время начала удаляемого события в формате ЧЧ:ММ`,
-      keyboard: timeKeyboard,
-    });
-  }
-  //выход
-  if (
-    /Отмена/i.test(context.text) ||
-    /Назад/i.test(context.text) ||
-    /back/i.test(context.text) ||
-    context.messagePayload?.command == 'back'
-  ) {
-    return await context.scene.step.previous();
-  }
-
-  if (!context.messagePayload?.date && context.text) {
-    if (!isValidStartTime(context.text)) {
-      return await context.reply(errorInputText);
-    }
-
-    let time = context.text;
-
-    context.scene.state.date.startTime = time;
-    context.scene.state.date.endTime = null;
-  } else {
-    context.scene.state.date = {
-      ...context.scene.state.date,
-      ...context.messagePayload.date,
-    };
-  }
-
-  return context.scene.step.next();
-};
-*/
-const stepThree = async (context) => {
+const stepTwo = async (context) => {
   if (context.scene.step.firstTime || !context.text) {
     return await context.send({
       message: `Введи название удаляемого события`,
@@ -94,7 +57,15 @@ const stepThree = async (context) => {
     });
   }
 
-  //выход
+  // выход
+  if (/Отмена/i.test(context.text) || /quit/i.test(context.text)) {
+    context.send(menuText, {
+      keyboard: menuKeyboard,
+    });
+    return await context.scene.leave();
+  }
+
+  //назад
   if (
     /Отмена/i.test(context.text) ||
     /Назад/i.test(context.text) ||
@@ -130,6 +101,6 @@ const stepThree = async (context) => {
   return await context.scene.leave();
 };
 
-const deleteFromSchedule = [stepOne, stepThree];
+const deleteFromSchedule = [stepOne, stepTwo];
 
 module.exports = { deleteFromSchedule };

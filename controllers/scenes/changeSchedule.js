@@ -16,10 +16,6 @@ const { checkEvent } = require('../../scripts/checkEvent');
 const { changeEvent } = require('../../scripts/changeEvent');
 
 const stepOne = async (context) => {
-  context.scene.state.eventToChangeInfo = {
-    date: undefined,
-    event: undefined,
-  };
   if (context.scene.step.firstTime || !context.text) {
     return await context.send({
       message: `Введи дату события, которое нужно изменить в формате ДД.ММ.ГГГГ или выбери один из вариантов на клавиатуре.
@@ -46,13 +42,13 @@ const stepOne = async (context) => {
       return await context.reply(errorInputText);
     }
     const [day, month, year] = context.text.split('.');
-    context.scene.state.eventToChangeInfo.date = {
-      year: year,
-      month: month,
-      day: day,
+    context.scene.state.eventToChangeInfo = {
+      date: { year: year, month: month, day: day },
     };
   } else {
-    context.scene.state.eventToChangeInfo.date = context.messagePayload.date;
+    context.scene.state.eventToChangeInfo = {
+      date: context.messagePayload.date,
+    };
   }
 
   return context.scene.step.next();
@@ -66,9 +62,16 @@ const stepTwo = async (context) => {
     });
   }
 
-  //выход
+  // выход
+  if (/Отмена/i.test(context.text) || /quit/i.test(context.text)) {
+    context.send(menuText, {
+      keyboard: menuKeyboard,
+    });
+    return await context.scene.leave();
+  }
+
+  //назад
   if (
-    /Отмена/i.test(context.text) ||
     /Назад/i.test(context.text) ||
     /back/i.test(context.text) ||
     context.messagePayload?.command == 'back'
@@ -85,8 +88,9 @@ const stepTwo = async (context) => {
   context.scene.state.eventToChangeInfo.event = context.text;
   const eventToChangeInfo = context.scene.state.eventToChangeInfo; // присваиваем в переменную для удобства
 
+  // смотрим есть ли такое событие в расписании?
   try {
-    context.scene.state.eventToChange = await checkEvent(eventToChangeInfo); // возвращает объект события или прокидывает ошибку
+    context.scene.state.eventToChange = await checkEvent(eventToChangeInfo); // возвращает объект события или прокидывает ошибку, если события нет
     return context.scene.step.next();
   } catch (err) {
     if (err.name == 'FindEventError') {
@@ -119,11 +123,11 @@ const stepThree = async (context) => {
     /Да/i.test(context.text) ||
     /yes/i.test(context.text)
   ) {
+    // делаем глубокую копию объекта события из таблицы в новое событие
     context.scene.state.newEvent = structuredClone(
-      // делаем глубокую копию объекта события в новое событие
       context.scene.state.eventToChange
     );
-    return await context.scene.step.next();
+    return await context.scene.step.next(); // идём дальше
   } else if (
     // если не хотим менять - выходим на первый шаг
     context.messagePayload?.command == 'no' ||
@@ -206,6 +210,9 @@ const stepFour = async (context) => {
           'Эта дата и место уже заняты! Попробуй выбрать другие.'
         );
       }
+      if (err.name == 'FindEventError') {
+        return await context.send('Ошибка! Не могу найти такое событие...');
+      }
     }
 
     context.send({
@@ -230,9 +237,9 @@ const stepDate = async (context) => {
   if (
     /Отмена/i.test(context.text) ||
     /quit/i.test(context.text) ||
+    /Назад/i.test(context.text) ||
     context.messagePayload?.command == 'quit'
   ) {
-    context.send(menuText);
     return await context.scene.step.go(3); // назад
   }
 

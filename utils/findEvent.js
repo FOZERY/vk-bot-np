@@ -1,10 +1,9 @@
-const findEvent = (eventToDelete, event) => {
+const findEvent = (firstEvent, secondEvent) => {
   return (
-    event.date.year == eventToDelete.date.year &&
-    event.date.month == eventToDelete.date.month &&
-    event.date.day == eventToDelete.date.day &&
-    // event.date.startTime == eventToDelete.date.startTime &&
-    event.event == eventToDelete.event
+    secondEvent.date.year == firstEvent.date.year &&
+    secondEvent.date.month == firstEvent.date.month &&
+    secondEvent.date.day == firstEvent.date.day &&
+    secondEvent.event == firstEvent.event
   );
 };
 

@@ -53,19 +53,16 @@ const hearCommand = (name, conditions, handle) => {
 
 hearCommand('start', [/Старт/i, /Начать/i, /start/i], menuCommands.menu);
 hearCommand('help', [/help/i, /Помощь/i], menuCommands.help);
-
 hearCommand(
   'add',
   [/Добавить/i, /Добавить в расписание/i, /Внести/i, /add/i],
   menuCommands.add
 );
-
 hearCommand(
   'delete',
   [/Удалить из расписания/i, /Удалить/i, /delete/i],
   menuCommands.delete
 );
-
 hearCommand(
   'change',
   [/Изменить расписание/i, /Изменить/i, /change/i],

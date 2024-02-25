@@ -58,7 +58,16 @@ const stepTwo = async (context) => {
       keyboard: timeKeyboard,
     });
   }
-  //выход
+
+  //отмена
+  if (/Отмена/i.test(context.text) || /quit/i.test(context.text)) {
+    context.send(menuText, {
+      keyboard: menuKeyboard,
+    });
+    return await context.scene.leave();
+  }
+
+  //назад
   if (
     /Отмена/i.test(context.text) ||
     /Назад/i.test(context.text) ||
@@ -70,6 +79,7 @@ const stepTwo = async (context) => {
 
   if (!context.messagePayload?.date && context.text) {
     if (!isValidTime(context.text)) {
+      // сообщение об ошибке, если время написано в неправильно формате
       return await context.reply(errorInputText);
     }
 
@@ -99,7 +109,15 @@ const stepThree = async (context) => {
     });
   }
 
-  //выход
+  //отмена
+  if (/Отмена/i.test(context.text) || /quit/i.test(context.text)) {
+    context.send(menuText, {
+      keyboard: menuKeyboard,
+    });
+    return await context.scene.leave();
+  }
+
+  //назад
   if (
     /Отмена/i.test(context.text) ||
     /Назад/i.test(context.text) ||
@@ -128,7 +146,15 @@ const stepFour = async (context) => {
     });
   }
 
-  //выход
+  //отмена
+  if (/Отмена/i.test(context.text) || /quit/i.test(context.text)) {
+    context.send(menuText, {
+      keyboard: menuKeyboard,
+    });
+    return await context.scene.leave();
+  }
+
+  //назад
   if (
     /Отмена/i.test(context.text) ||
     /Назад/i.test(context.text) ||
@@ -160,7 +186,15 @@ const stepFive = async (context) => {
     });
   }
 
-  //выход
+  //отмена
+  if (/Отмена/i.test(context.text) || /quit/i.test(context.text)) {
+    context.send(menuText, {
+      keyboard: menuKeyboard,
+    });
+    return await context.scene.leave();
+  }
+
+  //назад
   if (
     /Отмена/i.test(context.text) ||
     /Назад/i.test(context.text) ||
@@ -178,7 +212,7 @@ const stepFive = async (context) => {
   context.scene.state.organizer = context.text;
 
   const newEvent = context.scene.state;
-  // пробрасывать ошибку?
+
   try {
     await postNewEvent(newEvent);
   } catch (err) {
