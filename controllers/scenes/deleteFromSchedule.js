@@ -50,7 +50,7 @@ const stepOne = async (context) => {
   return context.scene.step.next();
 };
 
-const stepTwo = async (context) => {
+/*const stepTwo = async (context) => {
   if (context.scene.step.firstTime || !context.text) {
     return await context.send({
       message: `Введите время начала удаляемого события в формате ЧЧ:ММ`,
@@ -85,7 +85,7 @@ const stepTwo = async (context) => {
 
   return context.scene.step.next();
 };
-
+*/
 const stepThree = async (context) => {
   if (context.scene.step.firstTime || !context.text) {
     return await context.send({
@@ -130,6 +130,6 @@ const stepThree = async (context) => {
   return await context.scene.leave();
 };
 
-const deleteFromSchedule = [stepOne, stepTwo, stepThree];
+const deleteFromSchedule = [stepOne, stepThree];
 
 module.exports = { deleteFromSchedule };

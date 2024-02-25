@@ -4,6 +4,7 @@
     "@vk-io/hear": "^1.1.1",
     "@vk-io/scenes": "^1.2.1",
     "@vk-io/session": "^2.2.1",
+    "dotenv": "^16.4.5",
     "vk-io": "^4.9.1"
   }
 }

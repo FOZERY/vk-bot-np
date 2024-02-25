@@ -3,7 +3,7 @@ const findEvent = (eventToDelete, event) => {
     event.date.year == eventToDelete.date.year &&
     event.date.month == eventToDelete.date.month &&
     event.date.day == eventToDelete.date.day &&
-    event.date.startTime == eventToDelete.date.startTime &&
+    // event.date.startTime == eventToDelete.date.startTime &&
     event.event == eventToDelete.event
   );
 };
