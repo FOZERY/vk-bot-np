@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 const {
   menuKeyboard,
   dateKeyboard,
@@ -124,7 +126,7 @@ const stepThree = async (context) => {
     /yes/i.test(context.text)
   ) {
     // делаем глубокую копию объекта события из таблицы в новое событие
-    context.scene.state.newEvent = structuredClone(
+    context.scene.state.newEvent = _.cloneDeep(
       context.scene.state.eventToChange
     );
     return await context.scene.step.next(); // идём дальше
