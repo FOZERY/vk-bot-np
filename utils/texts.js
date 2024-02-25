@@ -18,6 +18,8 @@ const helpText = `Список команд:
 /start - начать
 /help - помощь
 /add - добавить в расписание
+/change - изменить расписание
+/delete - удалить из расписания
 `;
 
 module.exports = {
