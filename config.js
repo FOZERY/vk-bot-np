@@ -26,4 +26,5 @@ module.exports = {
   PAGE_ID,
   USER_ID,
   GROUP_ID,
+  PAGE_URL,
 };
