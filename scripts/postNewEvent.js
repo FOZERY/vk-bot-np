@@ -1,6 +1,4 @@
-const { API } = require('vk-io');
-
-const { USER_TOKEN } = require('../config.js');
+const { _API_VK } = require('../config.js');
 
 const { isTimeOverlap } = require('../utils/isTimeOverlap.js');
 
@@ -8,10 +6,7 @@ const { compareByDate } = require('../utils/compareByDate.js');
 
 const { OverlapError } = require('../utils/Errors.js');
 
-const api = new API({
-  token: USER_TOKEN,
-  apiVersion: '5.199',
-});
+const api = _API_VK;
 
 const fetchPage = async () => {
   try {

@@ -1,6 +1,5 @@
-const { LONG_POLL_TOKEN, USER_TOKEN } = require('./config.js');
+const { _VK } = require('./config.js');
 
-const { VK, API, Keyboard } = require('vk-io');
 const { HearManager } = require('@vk-io/hear');
 const { SessionManager } = require('@vk-io/session');
 
@@ -8,10 +7,7 @@ const { menuCommands } = require('./controllers/commands.js');
 
 const sceneManager = require('./controllers/scenes/scenes.js');
 
-const vk = new VK({
-  token: LONG_POLL_TOKEN,
-  apiVersion: '5.199',
-});
+const vk = _VK;
 
 const hearManager = new HearManager();
 const sessionManager = new SessionManager();
