@@ -11,7 +11,7 @@ npm i
 node bot.js
 ```
 
-# В .env прописать свои значения
+## В .env прописать свои значения
 
 ```
 LONG_POLL_TOKEN = your_token
