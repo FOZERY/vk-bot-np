@@ -1,3 +1,5 @@
+const { PAGE_URL } = require('../config.js');
+
 const { Keyboard } = require('vk-io');
 
 const timeKeyboard = Keyboard.builder()
@@ -145,7 +147,7 @@ const menuKeyboard = Keyboard.builder()
   .urlButton({
     label: 'Перейти к расписанию',
     color: Keyboard.SECONDARY_COLOR,
-    url: 'https://vk.com/page-8733923_35460052',
+    url: PAGE_URL,
   });
 
 const dateKeyboardGenerator = () => {
