@@ -18,7 +18,7 @@ USER_ID = process.env.USER_ID;
 
 GROUP_ID = process.env.GROUP_ID;
 
-PAGE_URL = process.env.GROUP_URL;
+PAGE_URL = process.env.PAGE_URL;
 
 module.exports = {
   _VK,
