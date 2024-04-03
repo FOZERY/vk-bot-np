@@ -15,7 +15,7 @@ const insertChangedEvent = (events, eventToChange, newEvent) => {
 
   events.splice(indexToChange, 1);
 
-  if (indexToChange == -1) {
+  if (indexToChange === -1) {
     throw new FindEventError('Событие не найдено!');
   }
 

@@ -7,5 +7,8 @@
     "dotenv": "^16.4.5",
     "lodash": "^4.17.21",
     "vk-io": "^4.9.1"
+  },
+  "scripts": {
+    "start": "node bot.js"
   }
 }

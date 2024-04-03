@@ -8,7 +8,7 @@
 
 ```
 npm i
-node bot.js
+npm start
 ```
 
 ## В .env прописать свои значения
