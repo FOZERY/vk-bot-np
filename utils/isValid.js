@@ -1,24 +1,15 @@
 const isValidDate = (userInput) => {
     const datePattern = /^(\d{2})\.(\d{2})\.(\d{4})$/;
-    let isValid = false;
-    if (datePattern.test(userInput)) {
-        let [, day, month, year] = userInput.match(datePattern);
-        day = parseInt(day);
-        month = parseInt(month);
-        year = parseInt(year);
 
-        if (month < 1 || month > 12) {
-            isValid = false;
-            return (isValid = false);
-        } else {
-            let dayInMonth = new Date(year, month, 0).getDate();
-            if (day < 1 || day > dayInMonth) {
-                return (isValid = false);
-            }
-        }
+    if (!datePattern.test(userInput)) {
+        return false;
     }
 
-    return isValid;
+    const [, day, month, year] = userInput.match(datePattern).map(Number);
+
+    const dayInMonth = new Date(year, month, 0).getDate();
+
+    return month >= 1 && month <= 12 && day >= 1 && day <= dayInMonth;
 };
 
 const splitTime = (time) => {
@@ -28,11 +19,10 @@ const splitTime = (time) => {
 
 const checkTime = (time) => {
     const [hour, minutes] = splitTime(time);
-    let isValid = true;
     if (!(hour >= 0 && hour <= 23) || !(minutes >= 0 && minutes <= 59))
-        isValid = false;
+        return false;
 
-    return isValid;
+    return true;
 };
 
 const isValidTime = (userInput) => {
