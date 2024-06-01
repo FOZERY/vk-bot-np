@@ -1,18 +1,18 @@
 const _ = require('lodash');
 
 const {
-  menuKeyboard,
-  dateKeyboard,
-  previousKeyboard,
-  yesOrNotKeyboard,
-  timeKeyboard,
-  addAddressKeyboard,
-  changeSelectKeyboard,
+    menuKeyboard,
+    getDateKeyboard,
+    previousKeyboard,
+    yesOrNotKeyboard,
+    timeKeyboard,
+    addAddressKeyboard,
+    changeSelectKeyboard,
 } = require('../../utils/keyboards');
 
 const { menuText, errorInputText } = require('../../utils//texts');
 
-const { isValidDate, isValidTime } = require('../../utils/isValid');
+const { isValidDate, isValidTime } = require('../../utils/isValidDateTime');
 
 const { checkEvent } = require('../../scripts/checkEvent');
 const { changeEvent } = require('../../scripts/changeEvent');
@@ -23,9 +23,9 @@ const stepOne = async (context) => {
       message: `Введи дату события, которое нужно изменить в формате ДД.ММ.ГГГГ или выбери один из вариантов на клавиатуре.
         
 Чтобы отменить изменение события, напиши "Отмена", либо нажми соответствующую кнопку на клавиатуре.`,
-      keyboard: dateKeyboard,
-    });
-  }
+            keyboard: getDateKeyboard(),
+        });
+    }
 
   // выход
   if (
@@ -231,9 +231,9 @@ const stepDate = async (context) => {
       message: `Введи дату в формате ДД.ММ.ГГГГ или выбери один из вариантов на клавиатуре.
 
 Чтобы отменить изменение нового события, напиши "Отмена", либо нажми соответствующую кнопку на клавиатуре.`,
-      keyboard: dateKeyboard,
-    });
-  }
+            keyboard: getDateKeyboard,
+        });
+    }
 
   // выход
   if (

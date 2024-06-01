@@ -1,12 +1,12 @@
 const { menuText, errorInputText } = require('../../utils/texts');
 
 const {
-  dateKeyboard,
-  menuKeyboard,
-  previousKeyboard,
+    getDateKeyboard,
+    menuKeyboard,
+    previousKeyboard,
 } = require('../../utils/keyboards');
 
-const { isValidDate } = require('../../utils/isValid.js');
+const { isValidDate } = require('../../utils/isValidDateTime.js');
 
 const { deleteEvent } = require('../../scripts/deleteEvent.js');
 
@@ -16,9 +16,9 @@ const stepOne = async (context) => {
       message: `Введи дату события, которое нужно удалить в формате ДД.ММ.ГГГГ или выбери один из вариантов на клавиатуре.
       
       Чтобы отменить удаление события, напиши "Отмена", либо нажми соответствующую кнопку на клавиатуре.`,
-      keyboard: dateKeyboard,
-    });
-  }
+            keyboard: getDateKeyboard(),
+        });
+    }
 
   // выход
   if (

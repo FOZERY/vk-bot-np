@@ -1,16 +1,18 @@
 const {
-  dateKeyboard,
-  timeKeyboard,
-  menuKeyboard,
-  previousKeyboard,
-  addAddressKeyboard,
+    getDateKeyboard,
+    timeKeyboard,
+    menuKeyboard,
+    previousKeyboard,
+    addAddressKeyboard,
+    yesOrNotKeyboard,
 } = require('../../utils/keyboards.js');
 
 const { menuText, errorInputText } = require('../../utils/texts.js');
 
 const { postNewEvent } = require('../../scripts/postNewEvent.js');
 
-const { isValidDate, isValidTime } = require('../../utils/isValid.js');
+const { isValidDate, isValidTime } = require('../../utils/isValidDateTime.js');
+const { isTimeOverlap } = require('../../utils/isTimeOverlap');
 
 const stepOne = async (context) => {
   if (context.scene.step.firstTime || !context.text) {
@@ -18,9 +20,9 @@ const stepOne = async (context) => {
       message: `Введи дату в формате ДД.ММ.ГГГГ или выбери один из вариантов на клавиатуре.
 
 Чтобы отменить добавление нового события, напиши "Отмена", либо нажми соответствующую кнопку на клавиатуре.`,
-      keyboard: dateKeyboard,
-    });
-  }
+            keyboard: getDateKeyboard(),
+        });
+    }
 
   // выход
   if (
